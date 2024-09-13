@@ -25,7 +25,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2    # this paragraph is included and can be deleted
         with:
-          node-version: 20
+          node-version: 16
 
         with:
           aws-access-key-id: ${{ ASIAQEFWA3IPH3JSYMXL }}
@@ -69,5 +69,5 @@ jobs:
       #  with:
       #    name: codeguru-results
       #    path: codeguru_results.json
-#TEST 1
+#TEST 1-1
 

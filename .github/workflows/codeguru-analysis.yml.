@@ -20,7 +20,7 @@ jobs:
 
       # Step 2: Configure AWS Credentials for CodeGuru and S3
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4 # switched from v2 to v4
         with:
           aws-access-key-id: ${{ ASIAQEFWA3IPH3JSYMXL }}
           aws-secret-access-key: ${{ sZNimxneJ3h/xs7pOXwN4eSadc/WpLXH0HNGpNqA }}

@@ -20,7 +20,13 @@ jobs:
 
       # Step 2: Configure AWS Credentials for CodeGuru and S3
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4 # switched from v2 to v4
+        uses: aws-actions/configure-aws-credentials@v2 # switched from v2 to v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2    # this paragraph is included and can be deleted
+        with:
+          node-version: 20
+
         with:
           aws-access-key-id: ${{ ASIAQEFWA3IPH3JSYMXL }}
           aws-secret-access-key: ${{ sZNimxneJ3h/xs7pOXwN4eSadc/WpLXH0HNGpNqA }}

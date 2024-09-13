@@ -49,18 +49,18 @@ jobs:
             --query 'CodeReviewSummaries[?State==`Completed`]' > codeguru_results.json
 
       # Step 6B: (Alternative) Commit the results back to the GitHub repository
-      #- name: Commit CodeGuru Results to GitHub
-      #  run: |
-      #    git config --global user.email "actions@github.com"
-      #    git config --global user.name "GitHub Actions"
-      #    git add codeguru_results.json
-      #    git commit -m "Add CodeGuru analysis results"
-      #    git push origin ${{ github.ref }}
+      - name: Commit CodeGuru Results to GitHub
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git add codeguru_results.json
+          git commit -m "Add CodeGuru analysis results"
+          git push origin ${{ github.ref }}
 
       # Step 6: Upload the results to GitHub as an artifact (use v4)
-      - name: Upload Results
-        uses: actions/upload-artifact@v4
-        with:
-          name: codeguru-results
-          path: codeguru_results.json
+      #- name: Upload Results
+      #  uses: actions/upload-artifact@v4
+      #  with:
+      #    name: codeguru-results
+      #    path: codeguru_results.json
 

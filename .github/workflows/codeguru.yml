@@ -1,56 +1,68 @@
-name: Analyze with CodeGuru Reviewer
+name: CodeGuru Analysis and Upload Results
 
-on: 
- - push
- - workflow_dispatch # This allows manual triggering of the action through the GitHub UI.
-
-permissions:
-    id-token: write
-    contents: read
-    security-events: write 
+on:
+  # Trigger on push to the main branch and pull request events
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - dev
 
 jobs:
-  build:
-    name: Analyze with CodeGuru Reviewer
+  codeguru:
     runs-on: ubuntu-latest
+
     steps:
-    - name: Configure AWS credentials
-      id: iam-role
-      continue-on-error: true
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        role-to-assume: arn:aws:iam::048169001733:role/GuruGitHubCICDRole
-        aws-region: us-west-2
-    
-    - uses: actions/checkout@v2
-      if: steps.iam-role.outcome == 'success'
-      with:
-        fetch-depth: 0
-    - name: Set up JDK 1.8
-      if: steps.iam-role.outcome == 'success'
-      uses: actions/setup-java@v1
-      with:
-        java-version: 1.8
-    - name: Build project
-      if: steps.iam-role.outcome == 'success'
-      run: mvn compile -DskipTests
+      # Step 1: Check out the repository
+      - name: Checkout Code
+        uses: actions/checkout@v3 # updated from v2 to v3
 
-    - name: CodeGuru Reviewer
-      uses: aws-actions/codeguru-reviewer@v1.1
-      if: steps.iam-role.outcome == 'success'
-      continue-on-error: false
-      with:          
-        s3_bucket: codeguru-reviewer-github-profiler-demo-048169001733-uw2
-        build_path: ./target/classes
+      # Step 2: Configure AWS Credentials for CodeGuru and S3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ ASIAQEFWA3IPH3JSYMXL }}
+          aws-secret-access-key: ${{ sZNimxneJ3h/xs7pOXwN4eSadc/WpLXH0HNGpNqA }}
+          aws-region: ${{ us-east-1 }}
 
-    - name: Store SARIF file
-      if: steps.iam-role.outcome == 'success'
-      uses: actions/upload-artifact@v2
-      with:
-        name: SARIF_recommendations
-        path: ./codeguru-results.sarif.json
+      # Step 3: Trigger CodeGuru Reviewer to analyze the repository
+      - name: Trigger CodeGuru Review
+        run: |
+          aws codeguru-reviewer create-code-review \
+            --name CodeGuruReview_${{ github.sha }} \
+            --repository-association-arn arn:aws:codeguru-reviewer:us-east-1:008971672094:association:59eb03ee-9a68-4478-9ea1-e22770a1fba6 \
+            --type RepositoryAnalysis
 
-    - name: Upload review result
+      # Step 4: Wait for CodeGuru Review (customize as needed)
+      - name: Wait for CodeGuru Review to Complete
+        run: |
+          echo "Waiting for CodeGuru review to complete..."
+          sleep 60 # Add custom wait logic to wait for CodeGuru to complete
+
+      # Step 5: Fetch CodeGuru results and save them to a file
+      - name: Fetch CodeGuru Results
+        run: |
+          aws codeguru-reviewer describe-code-reviews \
+            --type "RepositoryAnalysis" \
+            --repository-name "amazon-codeguru-reviewer-sample-app" \
+            --query 'CodeReviewSummaries[?State==`Completed`]' > codeguru_results.json
+
+      # Step 6B: (Alternative) Commit the results back to the GitHub repository
+      #- name: Commit CodeGuru Results to GitHub
+      #  run: |
+      #    git config --global user.email "actions@github.com"
+      #    git config --global user.name "GitHub Actions"
+      #    git add codeguru_results.json
+      #    git commit -m "Add CodeGuru analysis results"
+      #    git push origin ${{ github.ref }}
+
+      # Step 6: Upload the results to GitHub as an artifact (use v4)
+      - name: Upload Results
+        uses: actions/upload-artifact@v4  # Make sure this is set to v4
+        with:
+          name: codeguru-results
+          path: codeguru_results.json
       if: steps.iam-role.outcome == 'success'
       uses: github/codeql-action/upload-sarif@v1
       with:

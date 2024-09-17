@@ -40,10 +40,10 @@ jobs:
         with:
           node-version: 20
 
-        with:
-          aws-access-key-id: ${{ ASIAQEFWA3IPH3JSYMXL }}
-          aws-secret-access-key: ${{ sZNimxneJ3h/xs7pOXwN4eSadc/WpLXH0HNGpNqA }}
-          aws-region: ${{ us-east-1 }}
+        #with:
+        #  aws-access-key-id: ${{ ASIAQEFWA3IPH3JSYMXL }}
+        #  aws-secret-access-key: ${{ sZNimxneJ3h/xs7pOXwN4eSadc/WpLXH0HNGpNqA }}
+        #  aws-region: ${{ us-east-1 }}
 
       # Step 3: Trigger CodeGuru Reviewer to analyze the repository
       - name: Trigger CodeGuru Review

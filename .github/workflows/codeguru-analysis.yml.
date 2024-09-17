@@ -19,8 +19,21 @@ jobs:
         uses: actions/checkout@v3 # updated from v2 to v3
 
       # Step 2: Configure AWS Credentials for CodeGuru and S3
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4 # switched from v2 to v4
+      #- name: Configure AWS Credentials
+      #  uses: aws-actions/configure-aws-credentials@v4 # switched from v2 to v4
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::008971672094:role/git_role
+        aws-region: us-east-1
 
       - name: Set up Node.js
         uses: actions/setup-node@v4    # this paragraph is included and can be deleted

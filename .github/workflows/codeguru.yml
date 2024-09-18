@@ -48,7 +48,7 @@ jobs:
           sleep 60
 
       - name: List files in src directory
-      run: ls -al src
+        run: ls -al src
       
       - name: Check if CodeGuru Results file exists
         run: |

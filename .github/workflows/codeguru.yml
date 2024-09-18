@@ -19,28 +19,28 @@ jobs:
     steps:
       # Step 1: Check out the repository code
       - name: Checkout Code
-        uses: actions/checkout@v3 # Using the latest version (v3) to ensure compatibility
-
+        uses: actions/checkout@v3
+        
       # Step 2: Configure AWS Credentials for CodeGuru
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2 # Make sure to use v2 or higher
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::008971672094:role/git_role  # Replace with your AWS role ARN
+          role-to-assume: arn:aws:iam::008971672094:role/git_role
           aws-region: us-east-1
 
       # Step 3: Set up Node.js environment (optional if needed)
       - name: Set up Node.js
         uses: actions/setup-node@v4 # Using the latest version for Node.js setup
         with:
-          node-version: 20            # Ensure the Node.js version is correct
+          node-version: 20
 
       # Step 4: Trigger CodeGuru Reviewer to analyze the repository
       - name: Trigger CodeGuru Review
         run: |
           aws codeguru-reviewer create-code-review \
-            --name CodeGuruReview_${{ github.sha }} \   # Unique name for the review using the commit SHA
-            --repository-association-arn arn:aws:codeguru-reviewer:us-east-1:008971672094:association:59eb03ee-9a68-4478-9ea1-e22770a1fba6 \  # Replace with your association ARN
-            --type RepositoryAnalysis  # Specify the analysis type as repository-based
+            --name CodeGuruReview_${{ github.sha }} \
+            --repository-association-arn arn:aws:codeguru-reviewer:us-east-1:008971672094:association:59eb03ee-9a68-4478-9ea1-e22770a1fba6 \
+            --type RepositoryAnalysis
 
       # Step 5: Wait for CodeGuru Review to Complete (customize wait time as needed)
       - name: Wait for CodeGuru Review to Complete

@@ -51,39 +51,47 @@ jobs:
       - name: Get the Most Recent CodeGuru Review ARN
         id: get_arn
         run: |
-          REVIEW_ARN=$(aws codeguru-reviewer describe-code-review \
-          --type '{"RepositoryAnalysis": {"RepositoryHead": {"BranchName": "dev"}}}'
-          --repository-association-arn arn:aws:codeguru-reviewer:us-east-1:008971672094:association:59eb03ee-9a68-4478-9ea1-e22770a1fba6 \
-          --query 'CodeReviewSummaries[?State==`Completed`]|[0].CodeReviewArn' \
-          --output text)
+          # Fetch the ARN of the most recent completed CodeGuru review
+          REVIEW_ARN=$(aws codeguru-reviewer list-code-reviews \
+            --query 'codeReviews[?state==`Completed`].codeReviewArn' \
+            --output text | head -n 1)
+          
+          # Check if an ARN was found
+          if [ -z "$REVIEW_ARN" ]; then
+            echo "No CodeGuru review found."
+            exit 1
+          fi
+
+          # Set the ARN as a GitHub Actions environment variable
           echo "REVIEW_ARN=$REVIEW_ARN" >> $GITHUB_ENV
 
       # Step 7: Fetch the CodeGuru Results
       - name: Fetch CodeGuru Results
         run: |
           if [ -z "${{ env.REVIEW_ARN }}" ]; then
-          echo "No CodeGuru review found. Exiting."
-          exit 1
+            echo "No CodeGuru review ARN found. Exiting."
+            exit 1
           fi
+
           aws codeguru-reviewer get-recommendations \
-          --code-review-arn ${{ env.REVIEW_ARN }} \
-          --output json > codeguru_results.json
+            --code-review-arn ${{ env.REVIEW_ARN }} \
+            --output json > codeguru_results.json
 
       # Step 8: Commit the results back to the GitHub repository
       - name: Commit CodeGuru Results to GitHub
         run: |
           if [ -f codeguru_results.json ]; then
-          git config --global user.email "actions@github.com"
-          git config --global user.name "GitHub Actions"
-          git add codeguru_results.json
-          git commit -m "Add CodeGuru analysis results"
-          git push origin ${{ github.ref }}
+            git config --global user.email "actions@github.com"
+            git config --global user.name "GitHub Actions"
+            git add codeguru_results.json
+            git commit -m "Add CodeGuru analysis results"
+            git push origin ${{ github.ref }}
           else
-          echo "File codeguru_results.json does not exist."
-          exit 1
+            echo "File codeguru_results.json does not exist."
+            exit 1
           fi
 
-      # Step 7: Upload the results to GitHub as an artifact (optional)
+      # Step 9: Upload the results to GitHub as an artifact (optional)
       - name: Upload Results as Artifact
         uses: actions/upload-artifact@v4
         with:

@@ -47,6 +47,23 @@ jobs:
           echo "Waiting for CodeGuru review to complete..."
           sleep 590
 
+      # Step 5: Fetch CodeGuru Results and Save Them to a File
+      - name: Fetch CodeGuru Results
+        run: |
+          # Get the most recent CodeGuru review ARN
+          CODE_REVIEW_ARN=$(aws codeguru-reviewer list-code-reviews --query 'codeReviews[?state==`Completed`].codeReviewArn' --output text | head -n 1)
+
+          # Ensure the ARN is not empty
+          if [ -z "$CODE_REVIEW_ARN" ]; then
+            echo "No CodeGuru review found. Exiting."
+            exit 1
+          fi
+
+          # Retrieve the analysis results
+          aws codeguru-reviewer describe-code-review --code-review-arn $CODE_REVIEW_ARN --query 'codeReview.analysisResults' --output json > src/codeguru_results.json
+
+          echo "Retrieved CodeGuru results and saved to src/codeguru_results.json"
+      
       - name: List files in src directory
         run: ls -al src
       

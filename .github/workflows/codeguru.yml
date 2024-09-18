@@ -52,7 +52,7 @@ jobs:
       - name: Fetch CodeGuru Results
         run: |
           aws codeguru-reviewer describe-code-reviews \
-            --type "RepositoryAnalysis" \
+            --type RepositoryAnalysis \
             --repository-name "amazon-codeguru-reviewer-sample-app" \  # Use your repository name
             --query 'CodeReviewSummaries[?State==`Completed`]' > codeguru_results.json
 

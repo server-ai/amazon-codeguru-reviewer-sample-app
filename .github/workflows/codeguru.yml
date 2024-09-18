@@ -47,6 +47,10 @@ jobs:
           echo "Waiting for CodeGuru review to complete..."
           sleep 130
 
+          aws help
+          aws <command> help
+          aws <command> <subcommand> help
+
       # Step 6: Get the Most Recent CodeGuru Review ARN
       - name: Get the Most Recent CodeGuru Review ARN
         id: get_arn

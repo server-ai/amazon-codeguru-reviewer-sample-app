@@ -1,7 +1,6 @@
 name: CodeGuru Analysis and Upload Results
 
 on:
-  # Trigger on push to the dev branch and pull request events
   push:
     branches:
       - dev
@@ -13,8 +12,8 @@ jobs:
   codeguru:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write   # Allow using OpenID Connect (OIDC) tokens for authentication
-      contents: read    # Necessary for reading the repository contents
+      id-token: write
+      contents: read
 
     steps:
       # Step 1: Check out the repository code
@@ -28,9 +27,9 @@ jobs:
           role-to-assume: arn:aws:iam::008971672094:role/git_role
           aws-region: us-east-1
 
-      # Step 3: Set up Node.js environment (optional if needed)
+      # Step 3: Set up Node.js environment (if needed)
       - name: Set up Node.js
-        uses: actions/setup-node@v4 # Using the latest version for Node.js setup
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
@@ -40,23 +39,15 @@ jobs:
           aws codeguru-reviewer create-code-review \
             --name CodeGuruReview_${{ github.sha }} \
             --repository-association-arn arn:aws:codeguru-reviewer:us-east-1:008971672094:association:59eb03ee-9a68-4478-9ea1-e22770a1fba6 \
-            --type "RepositoryAnalysis"
+            --type RepositoryAnalysis
 
-      # Step 5: Wait for CodeGuru Review to Complete (customize wait time as needed)
-      - name: Wait for CodeGuru Review to Complete
+      # Step 5: Wait for CodeGuru Review to Complete
+       - name: Wait for CodeGuru Review to Complete
         run: |
           echo "Waiting for CodeGuru review to complete..."
-          sleep 60  # Add custom logic to wait for CodeGuru to complete, adjust the wait time as needed
+          sleep 60
 
-      # Step 6: Fetch CodeGuru results and save them to a file
-      - name: Fetch CodeGuru Results
-        run: |
-          aws codeguru-reviewer describe-code-reviews \
-            --type "RepositoryAnalysis" \
-            --repository-name "amazon-codeguru-reviewer-sample-app" \  # Use your repository name
-            --query 'CodeReviewSummaries[?State==`Completed`]' > codeguru_results.json
-
-      # Step 7: Commit the results back to the GitHub repository
+      # Step 6: Commit the results back to the GitHub repository
       - name: Commit CodeGuru Results to GitHub
         run: |
           git config --global user.email "actions@github.com"
@@ -65,11 +56,9 @@ jobs:
           git commit -m "Add CodeGuru analysis results"
           git push origin ${{ github.ref }}
 
-
-      # Step 6: Upload the results to GitHub as an artifact (use v4)
-      #- name: Upload Results
-      #  uses: actions/upload-artifact@v4
-      #  with:
-      #    name: codeguru-results
-      #    path: codeguru_results.json
-#TEST 1-2
+      # Step 7: Upload the results to GitHub as an artifact (optional)
+      - name: Upload Results as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeguru-results
+          path: codeguru_results.json

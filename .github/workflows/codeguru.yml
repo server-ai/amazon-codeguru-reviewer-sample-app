@@ -45,7 +45,7 @@ jobs:
       - name: Wait for CodeGuru Review to Complete
         run: |
           echo "Waiting for CodeGuru review to complete..."
-          sleep 60
+          sleep 590
 
       - name: List files in src directory
         run: ls -al src

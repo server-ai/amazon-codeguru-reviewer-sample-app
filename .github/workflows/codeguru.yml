@@ -47,9 +47,16 @@ jobs:
           echo "Waiting for CodeGuru review to complete..."
           sleep 60
 
-      # Check if the file exists
+      - name: List files in src directory
+      run: ls -al src
+      
       - name: Check if CodeGuru Results file exists
-        run: ls -al
+        run: |
+          if [ -f src/codeguru_results.json ]; then
+            echo "File src/codeguru_results.json exists."
+          else
+            echo "File src/codeguru_results.json does not exist."
+          fi
 
       # Step 6: Commit the results back to the GitHub repository
       - name: Commit CodeGuru Results to GitHub

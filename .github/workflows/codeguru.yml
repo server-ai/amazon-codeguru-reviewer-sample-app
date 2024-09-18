@@ -78,10 +78,10 @@ jobs:
           git add codeguru_results.json
           git commit -m "Add CodeGuru analysis results"
           git push origin ${{ github.ref }}
-        else
+          else
           echo "File codeguru_results.json does not exist."
           exit 1
-        fi
+          fi
 
       # Step 7: Upload the results to GitHub as an artifact (optional)
       - name: Upload Results as Artifact

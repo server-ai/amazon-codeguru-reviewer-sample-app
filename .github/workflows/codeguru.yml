@@ -40,7 +40,8 @@ jobs:
           aws codeguru-reviewer create-code-review \
             --name CodeGuruReview_${{ github.sha }} \
             --repository-association-arn arn:aws:codeguru-reviewer:us-east-1:008971672094:association:59eb03ee-9a68-4478-9ea1-e22770a1fba6 \
-            --type "RepositoryAnalysis"
+            --type RepositoryAnalysis
+            --debug
 
       # Step 5: Wait for CodeGuru Review to Complete (customize wait time as needed)
       - name: Wait for CodeGuru Review to Complete

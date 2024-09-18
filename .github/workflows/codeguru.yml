@@ -57,10 +57,10 @@ jobs:
           git push origin ${{ github.ref }}
 
       # Step 7: Upload the results to GitHub as an artifact (optional)
-      #- name: Upload Results as Artifact
-      #  uses: actions/upload-artifact@v4
-      #  with:
-      #    name: codeguru-results
-      #    path: codeguru_results.json
+      - name: Upload Results as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeguru-results
+          path: codeguru_results.json
 
       # Test 2-1

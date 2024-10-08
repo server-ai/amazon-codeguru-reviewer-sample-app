@@ -73,6 +73,24 @@ jobs:
             --code-review-arn ${{ env.REVIEW_ARN }} \
             --output json > codeguru_results.json
 
+      # Fetch the CodeGuru Review ARN
+      - name: Get the Most Recent CodeGuru Review ARN
+        id: get_arn
+        run: |
+          REVIEW_ARN=$(aws codeguru-reviewer list-code-reviews \
+            --type RepositoryAnalysis \
+            --query 'codeReviews[?state==`Completed`].codeReviewArn' \
+            --output text | head -n 1)
+
+      # Check if ARN is empty
+          if [ -z "$REVIEW_ARN" ]; then
+            echo "No CodeGuru review ARN found. Exiting."
+            exit 1
+          else
+            echo "REVIEW_ARN found: $REVIEW_ARN"
+            echo "REVIEW_ARN=$REVIEW_ARN" >> $GITHUB_ENV
+          fi
+
       # Step 7: Commit the results back to the GitHub repository
       - name: Commit CodeGuru Results to GitHub
         run: |

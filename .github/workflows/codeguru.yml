@@ -31,7 +31,7 @@ jobs:
       - name: Trigger CodeGuru Review
         run: |
           aws codeguru-reviewer create-code-review \
-            --name specific-file-analysis_${{ github.sha }} \
+            --name CodeGuru_file_analysis_${{ github.sha }} \
             --repository-association-arn arn:aws:codeguru-reviewer:us-east-1:008971672094:association:59eb03ee-9a68-4478-9ea1-e22770a1fba6 \
             --type '{"RepositoryAnalysis": {"RepositoryHead": {"BranchName": "master"}}}' \
             --region us-east-1

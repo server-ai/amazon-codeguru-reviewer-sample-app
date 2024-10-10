@@ -30,7 +30,6 @@ jobs:
       # Step 3: Trigger CodeGuru Reviewer to analyze the repository
       - name: Trigger CodeGuru Review
         run: |
-          echo "Triggering CodeGuru review..."
           aws codeguru-reviewer create-code-review \
             --name CodeGuru_file_analysis_${{ github.sha }} \
             --repository-association-arn arn:aws:codeguru-reviewer:us-east-1:008971672094:association:59eb03ee-9a68-4478-9ea1-e22770a1fba6 \
@@ -59,30 +58,24 @@ jobs:
             echo "DEBUG: No completed CodeGuru review found."
             echo "Check if the repository has any reviews completed and confirm the region: us-east-1"
             echo "Continuing script for debugging purposes..."
-          else
-            echo "DEBUG: CodeGuru review ARN successfully found: $REVIEW_ARN"
-            echo "REVIEW_ARN=$REVIEW_ARN" >> $GITHUB_ENV
+            echo "REVIEW_ARN=NONE" >> $GITHUB_ENV  # Store as NONE
+            exit 1  # Exiting with an error
           fi
+
+          echo "REVIEW_ARN=$REVIEW_ARN" >> $GITHUB_ENV
 
       # Step 6: Fetch the CodeGuru Results
       - name: Fetch CodeGuru Results
         run: |
-          if [ -z "${{ env.REVIEW_ARN }}" ]; then
+          if [ "${{ env.REVIEW_ARN }}" == "NONE" ]; then
             echo "No CodeGuru review ARN found in environment variables. Exiting."
             exit 1
           fi
 
           echo "Fetching recommendations for ARN: ${{ env.REVIEW_ARN }}"
           aws codeguru-reviewer list-recommendations \
-            --code-review-arn ${{ env.REVIEW_ARN }} \
+            --code-review-arn "${{ env.REVIEW_ARN }}" \
             --output json > codeguru_results.json
-
-          # Check if the recommendations file was generated
-          if [ -s codeguru_results.json ]; then
-            echo "DEBUG: Recommendations successfully fetched and stored in codeguru_results.json"
-          else
-            echo "DEBUG: No recommendations found or the file is empty."
-          fi
 
       # Step 7: Commit the results back to the GitHub repository
       - name: Commit CodeGuru Results to GitHub
@@ -104,4 +97,5 @@ jobs:
         with:
           name: codeguru-results
           path: codeguru_results.json
+
 

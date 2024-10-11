@@ -1,0 +1,166 @@
+{
+    "RecommendationSummaries": [
+        {
+            "FilePath": "src/main/java/com/shipmentEvents/handlers/EventHandler.java",
+            "RecommendationId": "6a86f8fd7c8cc4cd08c057b1a86199da9f28d699f440dec9206039f36f920555",
+            "StartLine": 100,
+            "EndLine": 100,
+            "Description": "This code appears to be waiting for a resource before it runs. You could use the waiters feature to help improve efficiency. Consider using ObjectExists or ObjectNotExists. For more information, see [https://aws.amazon.com/blogs/developer/waiters-in-the-aws-sdk-for-java/](https://aws.amazon.com/blogs/developer/waiters-in-the-aws-sdk-for-java/)",
+            "RecommendationCategory": "AWSBestPractices",
+            "RuleMetadata": {
+                "RuleId": "java/aws-polling-instead-of-waiter@v1.0",
+                "RuleName": "Inefficient polling of AWS resource",
+                "ShortDescription": "Custom polling can be inefficient and prone to error. Consider using AWS waiters instead.",
+                "LongDescription": "Custom polling can be inefficient and prone to error. Consider using AWS waiters instead. A waiter is an abstraction used to poll AWS resources, such as DynamoDB tables or Amazon S3 buckets, until a desired state is reached.",
+                "RuleTags": [
+                    "aws-java-sdk",
+                    "code-quality",
+                    "efficiency",
+                    "cwe-19",
+                    "java"
+                ]
+            },
+            "Severity": "Low"
+        },
+        {
+            "FilePath": "src/main/java/com/shipmentEvents/handlers/EventHandler.java",
+            "RecommendationId": "security-26e421e42845bb963226ec35c01132631d41ec769b709f4f4091633",
+            "StartLine": 67,
+            "EndLine": 67,
+            "Description": "It looks like your code uses a cipher object with an insecure transformation. To make your code more secure, use one of the following algorithms with a built-in integrity check: `AES/GCM/NoPadding` or `ChaCha20-Poly1305`.\n\n[Learn more](https://cwe.mitre.org/data/definitions/327.html)",
+            "RecommendationCategory": "SecurityIssues",
+            "RuleMetadata": {
+                "RuleId": "java/insecure-cryptography@v1.0",
+                "RuleName": "Insecure cryptography",
+                "ShortDescription": "Weak, broken, or misconfigured cryptography can lead to security vulnerabilities.",
+                "LongDescription": "Misuse of cryptography-related APIs can create security vulnerabilities. This includes one or more of the following: algorithms with known weaknesses, certain padding modes, lack of integrity checks, and insufficiently large key sizes.",
+                "RuleTags": [
+                    "cryptography",
+                    "security",
+                    "owasp-top10",
+                    "cwe-327",
+                    "cwe-328",
+                    "cwe-326",
+                    "cwe-208",
+                    "cwe-1240",
+                    "java"
+                ]
+            },
+            "Severity": "Critical"
+        },
+        {
+            "FilePath": "src/main/java/com/shipmentEvents/handlers/EventHandler.java",
+            "RecommendationId": "security-3aff582c2a2eaa0ce2be57b9272a46a90777bdfaf68c32d1bd27265",
+            "StartLine": 60,
+            "EndLine": 60,
+            "Description": "**Problem**: While re-throwing the caught exception with modifications , information about the caught exception is being lost, including information about the stack trace of the exception.\n\n**Fix**: If the caught exception object does not contain sensitive information, consider passing it as the \"rootCause\" or inner exception parameter to the constructor of the new exception before throwing the new exception. (Note that not all exception constructors support inner exceptions. Use a wrapper exception that supports inner exceptions.) \n[Learn more](https://www.ibm.com/support/pages/best-practice-catching-and-re-throwing-java-exceptions)\n\nSuggested remediation:\nConsider passing the exception object either as  \"rootCause\" or as an inner exception parameter, to the constructor of the new exception before throwing new exception. This will help keep stack trace.\n```\n@@ -61,3 +61,3 @@\n             logger.log(String.format(\"Failed to process shipment Updates in %s due to %s\", scheduledEvent.getAccount(), ex.getMessage()));\n-            throw new RuntimeException(\"Hiding the exception\");\n+            throw new RuntimeException(\"Hiding the exception\", ex);\n         }\n\n```",
+            "RecommendationCategory": "JavaBestPractices",
+            "RuleMetadata": {
+                "RuleId": "java/throw-exception-with-trace@v1.0",
+                "RuleName": "Stack trace not included in re-thrown exception",
+                "ShortDescription": "When re-throwing an exception, make sure to include the stack trace.",
+                "LongDescription": "When re-throwing an exception, make sure to include the stack trace. Otherwise pertinent debug information is lost.",
+                "RuleTags": [
+                    "data-integrity",
+                    "maintainability",
+                    "security",
+                    "security-context",
+                    "cwe-755",
+                    "java"
+                ]
+            },
+            "Severity": "Medium"
+        },
+        {
+            "FilePath": "src/main/java/com/shipmentEvents/handlers/EventHandler.java",
+            "RecommendationId": "security-636669bb7c496a09ab722d90bed67083b3115e6c40d2c6b02a8ab9c",
+            "StartLine": 121,
+            "EndLine": 121,
+            "Description": "This code uses an outdated API. [ListObjectsV2 is the revised List Objects API, and we recommend you use this revised API for new application developments](https://docs.aws.amazon.com/AmazonS3/latest/API/v2-RESTBucketGET.html).",
+            "RecommendationCategory": "AWSBestPractices",
+            "RuleMetadata": {
+                "RuleId": "java/not-recommended-apis@v1.0",
+                "RuleName": "Usage of an API that is not recommended",
+                "ShortDescription": "APIs that are not recommended were found.",
+                "LongDescription": "APIs that are not recommended were found. This could indicate a deeper problem in the code.",
+                "RuleTags": [
+                    "security",
+                    "security-context",
+                    "java"
+                ]
+            },
+            "Severity": "High"
+        },
+        {
+            "FilePath": "src/main/java/com/shipmentEvents/handlers/EventHandler.java",
+            "RecommendationId": "security-6a14a80e042cb5a4adaa95f56649558df5edec3d059b116028ab184",
+            "StartLine": 189,
+            "EndLine": 189,
+            "Description": "This code is written so that the client cannot be reused across invocations of the Lambda function.\nTo improve the performance of the Lambda function, consider using static initialization/constructor, global/static variables and singletons. It allows to keep alive and reuse HTTP connections that were established during a previous invocation.\nLearn more about [best practices for working with AWS Lambda functions](https://docs.aws.amazon.com/lambda/latest/dg/best-practices.html).",
+            "RecommendationCategory": "AWSBestPractices",
+            "RuleMetadata": {
+                "RuleId": "java/aws-client-per-invocation@v1.0",
+                "RuleName": "AWS Lambda client not reused",
+                "ShortDescription": "Reuse AWS clients in Lambda.",
+                "LongDescription": "The code does not reuse clients across invocations of the Lambda function. Performance can be enhanced by using static initialization or a static constructor, global or static variables, and singletons. It allows keep alive and reuse of the HTTP connections that were established during a previous invocation.",
+                "RuleTags": [
+                    "availability",
+                    "aws-java-sdk",
+                    "aws-lambda",
+                    "efficiency",
+                    "security",
+                    "security-context",
+                    "java"
+                ]
+            },
+            "Severity": "Medium"
+        },
+        {
+            "FilePath": "src/resources/setup.yml",
+            "RecommendationId": "security-e048b5409f33f44eef605bf19efc671699adad24738ae56cb370f65",
+            "StartLine": 16,
+            "EndLine": 16,
+            "Description": "It appears your code contains a hardcoded private key. This practice can expose your application to serious security risks, including unauthorized decryption of sensitive data and potential system intrusion. To remediate this issue, it is recommended to use AWS Secrets Manager to store and access secrets:\n\ta) Visit Secrets Manager on the AWS Management Console.\n\tb) Choose the secret type on the console page and follow the instructions.\n\tc) Use the suggested code samples to retrieve the secret.\n\nTo learn more about safe key management practices, see [OWASP key management cheat sheet](https://www.owasp.org/index.php/Cryptographic_Storage_Cheat_Sheet).",
+            "RecommendationCategory": "SecurityIssues",
+            "RuleMetadata": {
+                "RuleId": "text/hardcoded-credentials@v1.0",
+                "RuleName": "Hardcoded credentials",
+                "ShortDescription": "Hardcoded credentials can be intercepted by malicious actors.",
+                "LongDescription": "Hardcoded credentials can be intercepted by malicious actors. Even after removing them from the code they may still pose a risk because an attacker might have recorded them to use them at a later point in time.",
+                "RuleTags": [
+                    "secrets",
+                    "security",
+                    "owasp-top10",
+                    "top25-cwes",
+                    "cwe-798",
+                    "text",
+                    "credsweeper-1.59"
+                ]
+            },
+            "Severity": "Critical"
+        },
+        {
+            "FilePath": "src/main/java/com/shipmentEvents/handlers/EventHandler.java",
+            "RecommendationId": "security-e3b9d117aefc340ea03461741b929d74a9142cc09e373d59f113732",
+            "StartLine": 121,
+            "EndLine": 121,
+            "Description": "This code might not produce accurate results if the operation returns paginated results instead of all results. Consider adding another call to check for additional results.",
+            "RecommendationCategory": "AWSBestPractices",
+            "RuleMetadata": {
+                "RuleId": "java/missing-pagination@v1.0",
+                "RuleName": "Missing pagination",
+                "ShortDescription": "Additional results are not checked for a paginated API call. This might produce inaccurate results. ",
+                "LongDescription": "Paginated results are returned instead of all results. If additional results are not checked, this might produce inaccurate results. ",
+                "RuleTags": [
+                    "aws-java-sdk",
+                    "data-integrity",
+                    "security",
+                    "security-context",
+                    "cwe-19",
+                    "java"
+                ]
+            },
+            "Severity": "Medium"
+        }
+    ]
+}

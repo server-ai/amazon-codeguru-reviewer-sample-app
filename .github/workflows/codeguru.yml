@@ -1,6 +1,6 @@
 permissions:
   id-token: write
-  contents: read
+  contents: write  # Ensure write permission for contents
 
 name: CodeGuru Analysis and Upload Results
 
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
-      contents: read
+      contents: write  # Ensure write permission for contents
 
     steps:
       # Step 1: Check out the repository code
@@ -63,7 +63,6 @@ jobs:
           if [ -z "$REVIEW_ARN" ]; then
             echo "DEBUG: No completed CodeGuru review found."
             echo "Check if the repository has any reviews completed and confirm the region: us-east-1"
-            echo "Continuing script for debugging purposes..."
             echo "REVIEW_ARN=NONE" >> $GITHUB_ENV  # Store as NONE
             exit 1  # Exiting with an error
           fi
@@ -91,7 +90,7 @@ jobs:
             git config --global user.name "GitHub Actions"
             git add codeguru_results.json
             git commit -m "Add CodeGuru analysis results"
-            git push origin ${{ github.ref }}
+            git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} master
           else
             echo "File codeguru_results.json does not exist."
             exit 1
@@ -103,6 +102,7 @@ jobs:
         with:
           name: codeguru-results
           path: codeguru_results.json
+
 
 
 

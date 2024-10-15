@@ -1,0 +1,54 @@
+name: Automated Code Review with AWS Bedrock
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  code_review:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12'
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: |
+          pip install boto3
+
+      # Step 4: Download CodeGuru results (assume the previous workflow has stored the results)
+      - name: Download CodeGuru results
+        uses: actions/download-artifact@v2
+        with:
+          name: codeguru-results
+          path: ./  # Download to the root folder
+
+      # Step 5: Run the Python script to use AWS Bedrock (Llama 3) and CodeGuru results
+      - name: Review and correct code using AWS Bedrock and CodeGuru
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-1
+        run: |
+          python scripts/bedrock_code_review.py codeguru_results.json  # Pass the CodeGuru results as an argument
+
+      # Step 6: Commit and push corrections back to the repo
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Automated code corrections by AWS Bedrock and CodeGuru" || echo "No changes to commit"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

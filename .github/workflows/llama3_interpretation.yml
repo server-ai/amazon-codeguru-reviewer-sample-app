@@ -2,9 +2,6 @@ name: Automated Code Review with AWS Bedrock
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
 
 jobs:
   code_review:
@@ -13,7 +10,7 @@ jobs:
     steps:
       # Step 1: Check out the repository
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       # Step 2: Set up Python
       - name: Set up Python
@@ -26,29 +23,29 @@ jobs:
         run: |
           pip install boto3
 
-      # Step 4: Download CodeGuru results (assume the previous workflow has stored the results)
-      - name: Download CodeGuru results
-        uses: actions/download-artifact@v3
-        with:
-          name: codeguru-results
-          path: ./  # Download to the root folder
-
-      # Step 5: Run the Python script to use AWS Bedrock (Llama 3) and CodeGuru results
-      - name: Review and correct code using AWS Bedrock and CodeGuru
+      # Step 4: Process CodeGuru results and correct code using Llama 3
+      - name: Process CodeGuru Results with Llama 3
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: us-east-1
         run: |
-          python scripts/bedrock_code_review.py codeguru_results.json  # Pass the CodeGuru results as an argument
+          if [ -f "codeguru_results.json" ]; then
+            echo "Found codeguru_results.json, proceeding with Llama 3 correction."
+            python src/bedrock_code_review.py codeguru_results.json  # Ensure correct path to the script
+          else
+            echo "ERROR: codeguru_results.json not found in the root folder."
+            exit 1
+          fi
 
-      # Step 6: Commit and push corrections back to the repo
+      # Step 5: Commit and push corrections back to the repo
       - name: Commit and push changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "Automated code corrections by AWS Bedrock and CodeGuru" || echo "No changes to commit"
-          git push origin main
+          git commit -m "Automated code corrections based on CodeGuru results via Llama 3" || echo "No changes to commit"
+          git push origin master  # Ensure you're pushing to the correct branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

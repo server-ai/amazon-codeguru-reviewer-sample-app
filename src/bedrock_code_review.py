@@ -38,7 +38,7 @@ def main():
     recommendations = load_codeguru_results()
     
     # Define the path to the code file
-    code_file = 'src/main/java/com/shipmentEvents/handlers/<file_name>.java'
+    code_file = 'src/main/java/com/shipmentEvents/handlers/EventHandler.java'
 
     # Apply fixes to the code file based on the recommendations
     apply_fixes_to_code(code_file, recommendations)

@@ -14,19 +14,28 @@ def apply_fixes_to_code(code_file, recommendations):
     with open(code_file, 'r') as f:
         code_lines = f.readlines()
 
-    # Process recommendations and apply fixes
-    for rec in recommendations['recommendations']:
-        issue = rec['description']  # e.g., the description of the issue
-        location = rec['filePath']  # path to the file
-        start_line = rec['startLine'] - 1  # code line where issue is
-        end_line = rec['endLine'] - 1  # end line of the issue
-        suggested_fix = rec['suggestedFixes'][0]['content']
+    # Debugging: print the recommendations loaded
+    print(f"DEBUG: Recommendations loaded: {recommendations}")
 
-        # Log the issue and suggested fix
-        print(f"Fixing issue at {start_line + 1} to {end_line + 1}: {issue}")
+    # Check if the 'RecommendationSummaries' key exists
+    if 'RecommendationSummaries' not in recommendations:
+        print("ERROR: 'RecommendationSummaries' key not found in CodeGuru results.")
+        return
 
-        # Apply the fix by replacing the relevant lines
-        code_lines[start_line:end_line + 1] = [suggested_fix + '\n']
+    # Process each recommendation and apply the fixes
+    for rec in recommendations['RecommendationSummaries']:
+        issue = rec['Description']
+        file_path = rec['FilePath']
+        start_line = rec['StartLine'] - 1  # zero-indexed for Python
+        end_line = rec['EndLine'] - 1
+        suggested_fix = rec.get('SuggestedFix', {}).get('Content', '')
+
+        # Log the issue and the lines being fixed
+        print(f"Fixing issue at lines {start_line + 1} to {end_line + 1} in {file_path}: {issue}")
+
+        # Apply the fix by replacing the relevant lines if suggested fix is available
+        if suggested_fix:
+            code_lines[start_line:end_line + 1] = [suggested_fix + '\n']
 
     # Write the modified code back to the file
     with open(code_file, 'w') as f:
@@ -36,8 +45,8 @@ def apply_fixes_to_code(code_file, recommendations):
 def main():
     # Ensure that the recommendations are read correctly
     recommendations = load_codeguru_results()
-    
-    # Define the path to the code file
+
+    # Define the path to the actual code file you want to modify
     code_file = 'src/main/java/com/shipmentEvents/handlers/EventHandler.java'
 
     # Apply fixes to the code file based on the recommendations
@@ -45,4 +54,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 

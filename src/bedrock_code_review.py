@@ -1,58 +1,48 @@
+import os
 import json
 import boto3
-import os
 
-# Initialize AWS Bedrock client
-bedrock_client = boto3.client('bedrock', region_name=os.getenv('AWS_REGION'))
+# Load the CodeGuru recommendations from codeguru_results.json
+def load_codeguru_results():
+    with open('codeguru_results.json', 'r') as f:
+        recommendations = json.load(f)
+    return recommendations
 
-# Load CodeGuru results
-def load_codeguru_results(file_path):
-    with open(file_path, 'r') as f:
-        return json.load(f)
+# Function to apply fixes to the code file based on recommendations
+def apply_fixes_to_code(code_file, recommendations):
+    # Read the original code
+    with open(code_file, 'r') as f:
+        code_lines = f.readlines()
 
-# Send prompt to Llama 3 and get the response
-def get_llama3_suggestions(issue_description, code_snippet):
-    prompt = f"Here is a code issue found by CodeGuru: {issue_description}. Here is the code:\n{code_snippet}\nHow can this be fixed?"
-    
-    response = bedrock_client.invoke_model(
-        modelId='llama-3',
-        body={
-            'prompt': prompt,
-            'maxTokens': 512
-        }
-    )
-    
-    return response['body']['text']
+    # Process recommendations and apply fixes
+    for rec in recommendations['recommendations']:
+        issue = rec['description']  # e.g., the description of the issue
+        location = rec['filePath']  # path to the file
+        start_line = rec['startLine'] - 1  # code line where issue is
+        end_line = rec['endLine'] - 1  # end line of the issue
+        suggested_fix = rec['suggestedFixes'][0]['content']
+
+        # Log the issue and suggested fix
+        print(f"Fixing issue at {start_line + 1} to {end_line + 1}: {issue}")
+
+        # Apply the fix by replacing the relevant lines
+        code_lines[start_line:end_line + 1] = [suggested_fix + '\n']
+
+    # Write the modified code back to the file
+    with open(code_file, 'w') as f:
+        f.writelines(code_lines)
 
 # Main function
-def main(codeguru_results_path):
-    # Load the CodeGuru results
-    codeguru_results = load_codeguru_results(codeguru_results_path)
+def main():
+    # Ensure that the recommendations are read correctly
+    recommendations = load_codeguru_results()
+    
+    # Define the path to the code file
+    code_file = 'src/main/java/com/shipmentEvents/handlers/<file_name>.java'
 
-    for recommendation in codeguru_results.get('recommendations', []):
-        issue = recommendation['recommendationSummary']
-        code_snippet = recommendation['codeLine']
-        
-        # Get suggestions from Llama 3
-        suggestion = get_llama3_suggestions(issue, code_snippet)
-        
-        print(f"CodeGuru issue: {issue}")
-        print(f"Llama 3 suggestion: {suggestion}")
-        
-        # Here, implement logic to apply the suggestion back to the code files
-        
-        # Example: Write suggestion back to the file (this requires custom parsing and code modification logic)
-        # with open(recommendation['filePath'], 'r+') as code_file:
-        #     code = code_file.read()
-        #     fixed_code = apply_suggestion(code, suggestion)  # Custom logic needed
-        #     code_file.seek(0)
-        #     code_file.write(fixed_code)
+    # Apply fixes to the code file based on the recommendations
+    apply_fixes_to_code(code_file, recommendations)
 
 if __name__ == "__main__":
-    import sys
-    if len(sys.argv) != 2:
-        print("Usage: python bedrock_code_review.py <path_to_codeguru_results>")
-        sys.exit(1)
-    
-    codeguru_results_path = sys.argv[1]
-    main(codeguru_results_path)
+    main()
+

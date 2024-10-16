@@ -15,7 +15,7 @@ def analyze_and_correct_code():
         logging.info("Loaded CodeGuru recommendations.")
 
         # Read the code from the file that CodeGuru reviewed
-        with open('src/main/java/com/shipmentEvents/handlers/EventHandler.java', 'r') as file:
+        with open('src/master/java/com/shipmentEvents/handlers/EventHandler.java', 'r') as file:
             code = file.read()
 
         # Correct the code with Llama 3 based on CodeGuru recommendations
@@ -23,7 +23,7 @@ def analyze_and_correct_code():
 
         if corrected_code and corrected_code != code:
             # Write the corrected code back to the file
-            with open('src/main/java/com/shipmentEvents/handlers/EventHandler.java', 'w') as file:
+            with open('src/master/java/com/shipmentEvents/handlers/EventHandler.java', 'w') as file:
                 file.write(corrected_code)
             logging.info("Corrected code written back to the file.")
         else:
@@ -46,7 +46,7 @@ def correct_code_with_llama3(code, recommendations):
         description = rec.get("Description")
 
         # Only include recommendations for the specified file
-        if file_path == 'src/main/java/com/shipmentEvents/handlers/EventHandler.java':
+        if file_path == 'src/master/java/com/shipmentEvents/handlers/EventHandler.java':
             prompt += f"Please modify the code from line {start_line} to {end_line} with the following recommendation:\n{description}\n"
 
     prompt += "Only change the specified lines and ensure the rest of the code remains intact.\n"
@@ -82,7 +82,7 @@ def correct_code_with_llama3(code, recommendations):
         logging.error(f"Failed to retrieve corrected code from Llama 3: {e}")
         return None
 
-if __name__ == "__main__":
+if __name__ == "__master__":
     logging.basicConfig(level=logging.INFO)
     analyze_and_correct_code()
 

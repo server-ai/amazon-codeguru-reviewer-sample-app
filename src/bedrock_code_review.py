@@ -4,7 +4,7 @@ import logging
 from botocore.exceptions import ClientError
 
 # Set the correct model ID (change to an always available one like Claude)
-MODEL_ID = "anthropic.claude-v1:0"
+MODEL_ID = "anthropic.claude-v2:1"
 REGION = "us-east-1"
 
 def analyze_and_correct_code():
@@ -49,8 +49,8 @@ def get_model_explanation(recommendations):
 
     native_request = {
         "prompt": prompt,
-        "max_gen_len": 512,
-        "temperature": 0.5,
+        "max_gen_len": 2000,
+        "temperature": 0.7,
     }
 
     try:
@@ -73,8 +73,8 @@ def correct_code_with_model(code, recommendations):
 
     native_request = {
         "prompt": prompt,
-        "max_gen_len": 1024,
-        "temperature": 0.5,
+        "max_gen_len": 2000,
+        "temperature": 0.7,
     }
 
     try:

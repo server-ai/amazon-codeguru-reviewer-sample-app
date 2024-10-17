@@ -114,6 +114,6 @@ def correct_code_with_llama3(code, recommendations):
         logging.error(f"Failed to retrieve corrected code from Llama 3: {e}")
         return None
 
-if __name__ == "__master__":
+if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     analyze_and_correct_code()

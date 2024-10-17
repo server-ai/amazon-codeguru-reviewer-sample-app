@@ -18,10 +18,10 @@ jobs:
         with:
           python-version: '3.12'
 
-      # Step 3: Install dependencies
+      # Step 3: Install dependencies (specific boto3 version for Bedrock support)
       - name: Install dependencies
         run: |
-          pip install boto3
+          pip install boto3==1.28.0  # Ensure this is compatible with Bedrock
 
       # Step 4: Run code review and correction script
       - name: Review and correct code using AWS Bedrock and CodeGuru

@@ -17,8 +17,8 @@ def analyze_and_correct_code():
         
         logging.info(f"Recommendations loaded: {json.dumps(recommendations, indent=2)}")
 
-        # Open the original code file
-        with open('src/master/java/com/shipmentEvents/handlers/EventHandler.java', 'r') as code_file:
+        # Open the original code file (correct path: 'src/main' not 'src/master')
+        with open('src/main/java/com/shipmentEvents/handlers/EventHandler.java', 'r') as code_file:
             code = code_file.read()
 
         logging.info("Original code loaded for review.")
@@ -32,7 +32,7 @@ def analyze_and_correct_code():
         
         if corrected_code and corrected_code != code:
             # Write the corrected code to the same file
-            with open('src/master/java/com/shipmentEvents/handlers/EventHandler.java', 'w') as code_file:
+            with open('src/main/java/com/shipmentEvents/handlers/EventHandler.java', 'w') as code_file:
                 code_file.write(corrected_code)
             logging.info("Corrected code written back to the file.")
         else:

@@ -79,13 +79,18 @@ def correct_code_with_llama3(code, recommendations):
         
         return corrected_code
 
-    except (ClientError, Exception) as e:
-        logging.error(f"Failed to retrieve corrected code from Llama 3: {e}")
+    # Combine these two exception types properly
+    except ClientError as e:
+        logging.error(f"ClientError: Failed to retrieve corrected code from Llama 3: {e}")
+        return None
+    except Exception as e:
+        logging.error(f"Exception: Failed to retrieve corrected code from Llama 3: {e}")
         return None
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     analyze_and_correct_code()
+
 
 
     except (ClientError, Exception) as e:

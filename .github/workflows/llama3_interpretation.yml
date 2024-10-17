@@ -1,4 +1,4 @@
-name: Code Review with Hugging Face LLaMA or Claude
+name: Automated Code Review with AWS Bedrock
 
 on:
   workflow_dispatch:
@@ -21,22 +21,24 @@ jobs:
       # Step 3: Install dependencies
       - name: Install dependencies
         run: |
-          pip install requests
+          pip install boto3
 
-      # Step 4: Run the code review script
-      - name: Review code using Hugging Face API
+      # Step 4: Run code review and correction script
+      - name: Review and correct code using AWS Bedrock and CodeGuru
         env:
-          HUGGING_FACE_API_KEY: ${{ secrets.HUGGING_FACE_API_KEY }} # Store in GitHub secrets
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-1
         run: |
-          python src/huggingface_code_review.py
+          python src/bedrock_code_review.py
 
-      # Step 5: Commit and push changes back to the repo
+      # Step 5: Commit and push corrections back to the repo
       - name: Commit and push changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "Automated code corrections using Hugging Face" || echo "No changes to commit"
+          git commit -m "Automated code corrections based on CodeGuru by AWS Bedrock" || echo "No changes to commit"
           git push origin master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

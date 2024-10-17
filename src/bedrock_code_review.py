@@ -3,11 +3,8 @@ import json
 import logging
 from botocore.exceptions import ClientError
 
-# Initialize logging
-logging.basicConfig(level=logging.INFO)
-
-# Constants for AWS Bedrock
-MODEL_ID = "meta.llama3-70b-instruct-v1:0"
+# Set the correct model ID (change to an always available one like Claude)
+MODEL_ID = "anthropic.claude-v1:0"
 REGION = "us-east-1"
 
 def analyze_and_correct_code():
@@ -19,17 +16,21 @@ def analyze_and_correct_code():
         
         logging.info(f"Recommendations loaded: {json.dumps(recommendations, indent=2)}")
 
-        # Open the original code file
+        # Open the original code file (correct path: 'src/main')
         with open('src/main/java/com/shipmentEvents/handlers/EventHandler.java', 'r') as code_file:
             code = code_file.read()
 
         logging.info("Original code loaded for review.")
         
-        # Pass the CodeGuru recommendations and code to Llama 3
-        corrected_code = correct_code_with_llama3(code, recommendations)
+        # Ask Llama 3 (or any other available model) to explain what it sees in the CodeGuru payload
+        explanation = get_model_explanation(recommendations)
+        logging.info(f"Model's explanation of the CodeGuru recommendations:\n{explanation}")
+        
+        # Continue to apply the corrections
+        corrected_code = correct_code_with_model(code, recommendations)
         
         if corrected_code and corrected_code != code:
-            # Write the corrected code back to the file
+            # Write the corrected code to the same file
             with open('src/main/java/com/shipmentEvents/handlers/EventHandler.java', 'w') as code_file:
                 code_file.write(corrected_code)
             logging.info("Corrected code written back to the file.")
@@ -40,53 +41,57 @@ def analyze_and_correct_code():
         logging.error(f"Error during code review: {str(e)}")
         exit(1)
 
-def correct_code_with_llama3(code, recommendations):
-    # Create a Bedrock Runtime client
+def get_model_explanation(recommendations):
     client = boto3.client("bedrock-runtime", region_name=REGION)
 
-    # Prepare the prompt for Llama 3, including the CodeGuru recommendations
-    logging.info("Sending code and CodeGuru recommendations to Llama 3 for corrections.")
-    prompt = f"Here is the original Java code:\n\n{code}\n\n"
-    prompt += "I want you to make corrections based on these specific CodeGuru recommendations:\n\n"
-    prompt += json.dumps(recommendations, indent=2)
-    
-    # Format the request payload for Llama 3
-    formatted_prompt = f"""
-    <|begin_of_text|><|start_header_id|>user<|end_header_id|>
-    {prompt}
-    <|eot_id|>
-    <|start_header_id|>assistant<|end_header_id|>
-    """
+    prompt = f"Here is a JSON payload from CodeGuru containing code recommendations:\n\n{json.dumps(recommendations, indent=2)}\n\n"
+    prompt += "Can you explain what this payload represents and summarize the key points?"
 
     native_request = {
-        "prompt": formatted_prompt,
-        "max_gen_len": 1024,  # Adjust length based on expected output
+        "prompt": prompt,
+        "max_gen_len": 512,
         "temperature": 0.5,
     }
 
-    # Send the request to Llama 3
+    try:
+        request = json.dumps(native_request)
+        response = client.invoke_model(modelId=MODEL_ID, body=request)
+        model_response = json.loads(response["body"].read())
+        explanation = model_response.get("generation", "No explanation received.")
+        return explanation
+
+    except (ClientError, Exception) as e:
+        logging.error(f"Failed to retrieve explanation from model: {e}")
+        return None
+
+def correct_code_with_model(code, recommendations):
+    client = boto3.client("bedrock-runtime", region_name=REGION)
+
+    prompt = f"Here is the original code:\n\n{code}\n\n"
+    prompt += "I want you to only make the changes based on the following CodeGuru recommendations:\n"
+    prompt += json.dumps(recommendations, indent=2)
+
+    native_request = {
+        "prompt": prompt,
+        "max_gen_len": 1024,
+        "temperature": 0.5,
+    }
+
     try:
         request = json.dumps(native_request)
         response = client.invoke_model(modelId=MODEL_ID, body=request)
         model_response = json.loads(response["body"].read())
         
-        # Extract the generated corrected code from the response
-        corrected_code = model_response.get('generation', '')
-        if corrected_code:
-            logging.info("Received corrected code from Llama 3.")
-        else:
-            logging.warning("No corrections were suggested by Llama 3.")
-        
+        corrected_code = model_response.get("generation", "")
+        logging.info("Received corrected code from the model.")
         return corrected_code
 
-    except ClientError as e:
-        logging.error(f"ClientError: Failed to retrieve corrected code from Llama 3: {e}")
-        return None
-    except Exception as e:
-        logging.error(f"Exception: Failed to retrieve corrected code from Llama 3: {e}")
+    except (ClientError, Exception) as e:
+        logging.error(f"Failed to retrieve corrected code from model: {e}")
         return None
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     analyze_and_correct_code()
+
 
